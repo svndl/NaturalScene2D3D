@@ -6,10 +6,12 @@ function rcaDataOut = rcaReadRawEEG(database)
     eegRCA = fullfile(rca_path.rcaEEG, database);
     eegSrc = fullfile(rca_path.srcEEG, database);
 
-    proj_dir = uigetdir(eegSrc, 'Select the EEG raw data folder');
-    if (~(proj_dir))
-        error('No directory selected, quitting...');
-    end
+    proj_dir = eegSrc;
+
+%    proj_dir = uigetdir(eegSrc, 'Select the EEG raw data folder');
+%    if (~(proj_dir))
+%        error('No directory selected, quitting...');
+%    end
 
     %% take powerdiva export and convert it to cell array format
     list_subj = list_folder(proj_dir);
