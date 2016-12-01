@@ -10,9 +10,11 @@ function rcaOnSplitConditions
             how.allCnd = {'D', 'E'; 'D', 'O'; 'D', 'S'; 'E', 'D';'E', 'O'; 'E', 'S'; 'O', 'D'; 'O', 'E'; 'O', 'S'; 'S', 'D'; 'S', 'E'; 'S', 'O'};
             %how.splitBy = {'D', 'E', 'O', 'S'};
             how.splitBy = {'E', 'S'};
+            seg_duration = 660;
         case 'Middlebury'
             how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
             how.splitBy = {'O', 'S'};
+            seg_duration = 500;
         otherwise
     end
             
@@ -49,7 +51,7 @@ function rcaOnSplitConditions
     catDataAll = cat(3, rcaDataAll{:});
     muDataAll = nanmean(catDataAll, 3);
     
-    timeCourse = linspace(0, 660, size(muDataAll, 1));
+    timeCourse = linspace(0, seg_duration, size(muDataAll, 1));
 
     close all;
     nCnd = numel(how.splitBy);
