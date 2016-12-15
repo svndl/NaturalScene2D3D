@@ -44,7 +44,7 @@ function nacSc_rcaOnSplitConditions(nScenes)
         mkdir(dirResFigures);
     end
    
-    eegCND = rca_getData4RCA(database, how, reuse);
+    eegCND = natSc_getData4RCA(database, how, reuse);
     
     %run on everything 
     nReg = 7;
@@ -72,16 +72,14 @@ function nacSc_rcaOnSplitConditions(nScenes)
     h = cell(nCnd, 1);
     %% run the projections, plot the topography
     baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the baseline
-    
-    
-    
+      
     for c = 1:nComp
         
         subplot(nComp, 2, 2*c - 1);                
         color_idx = 1;        
         for cn = nCnd:-1:1  
-            [muData_C, semData_C] = rcaProjectmyData(eegCND(:, cn), W,baselineSample);   
-            %[muData_C, semData_C] = rcaProjectmyData(eegCND(:, cn), W);
+            [muData_C, semData_C] = natSc_ProjectmyData(eegCND(:, cn), W,baselineSample);   
+            %[muData_C, semData_C] = matSc_ProjectmyData(eegCND(:, cn), W);
             hs = shadedErrorBar(timeCourse, muData_C(:, c), semData_C(:, c), cl{color_idx}); hold on
             h{cn} = hs.patch;
             color_idx = color_idx + 1;
