@@ -1,6 +1,6 @@
 # rcaNatScenes
 
-RCA toolbox for analyzing source EEG Data from two 3D/2D experiments. 
+RCA toolbox for analyzing source EEG Data from three 3D/2D experiments.
 Dependencies: https://github.com/svndl/rcaBase.git
 Most of the analysis is done on split EEG data, splits and conditions to use are defined in the *switch* block.
 Results (figures) are saved in *dirResData = fullfile(rca_path.results_Data, database)*.
