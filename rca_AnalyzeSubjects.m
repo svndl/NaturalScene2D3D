@@ -1,10 +1,10 @@
-function rca_AnalyzeSubjects
+function rca_AnalyzeSubjects(database)
 
     %Project RCA on individual scenes
     %Calculate differences between scenes
     %Get OZ signal for each scene  
     
-    database = 'Live3D';
+    %database = 'Live3D_new';
     rca_path = rca_setPath;
     dirResData = fullfile(rca_path.results_Data, database);
     % describing splits
@@ -16,7 +16,12 @@ function rca_AnalyzeSubjects
         case 'Middlebury'
             how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
             how.splitBy = {'O', 'S'};
-            timeCourseLen = 500;          
+            timeCourseLen = 500;
+        case 'Test'%Live3D_new
+            how.allCnd = {'O', 'S'; 'S', 'O'};
+            how.splitBy = {'O', 'S'};
+            timeCourseLen = 750;  
+            how.nScenes = 1;
         otherwise
     end
     
@@ -29,12 +34,15 @@ function rca_AnalyzeSubjects
     how.useCnd = how.allCnd;
     how.nSplits = 4;
     how.useSplits = [2, 4];
-    how.baseline = 1;
+    how.baseline = 0;
     reuse = 1;
     dirResFigures = fullfile(rca_path.results_Figures, database, strcat('rcaProject', how.splitBy{:}));
     
     if (~exist(dirResFigures, 'dir'))
         mkdir(dirResFigures);
+    end
+    if (~exist(dirResData, 'dir'))
+        mkdir(dirResData);
     end
     
     %% get RC weights    
@@ -45,8 +53,8 @@ function rca_AnalyzeSubjects
     
     rcaFileAll = fullfile(dirResData, strcat('rcaOn', how.splitBy{:}, '.mat'));
     if(~exist(rcaFileAll, 'file'))
-        [~, W, ~, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp);
-        save(rcaFileAll, 'rcaDataAll', 'W', 'A');
+        [~, W, A, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp);
+        save(rcaFileAll, 'W', 'A');
     else
         load(rcaFileAll);
     end
@@ -67,11 +75,13 @@ function rca_AnalyzeSubjects
     nSubj = numel(subj_list);
     
     close all;
+    
+    baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the baseline
     for si = 1:nSubj    
         subplot(row, col, si);
         color_idx = 1;        
         for cn = nCnd:-1:1  
-            [muData_C, semData_C] = rcaProjectmyData(eegCND(si, cn), W);    
+            [muData_C, semData_C] = rcaProjectmyData(eegCND(si, cn), W,baselineSample);    
             hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
             h{cn} = hs.patch;
             color_idx = color_idx + 1;
