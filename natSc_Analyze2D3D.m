@@ -103,8 +103,8 @@ function rca_Analyze2D3D(database,nScenes)
     end
     
     if(~exist(rcaFileAll, 'file'))
-        [~, W, A, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp);
-        save(rcaFileAll, 'W', 'A');
+        [rcaDataAll, W, A, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp);
+        save(rcaFileAll, 'W', 'A','rcaDataAll');
     else
         load(rcaFileAll);
     end
