@@ -1,4 +1,4 @@
-function plotSubjOZ
+function natSc_plotSubjOZ
 
     database = 'Live3D_new';
     rca_path = rca_setPath;
