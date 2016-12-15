@@ -1,6 +1,6 @@
 function plotSubjOZ
 
-    database = 'Live3D';
+    database = 'Live3D_new';
     rca_path = rca_setPath;
 
     
@@ -13,6 +13,9 @@ function plotSubjOZ
             how.splitBy = {'O', 'S'};
         case 'Middlebury'
             how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
+            how.splitBy = {'O', 'S'};
+        case 'Live3D_new'
+            how.allCnd = {'O', 'S'; 'S', 'O'};
             how.splitBy = {'O', 'S'};
         otherwise
     end
@@ -28,7 +31,8 @@ function plotSubjOZ
     how.nSplits = 4;
     how.useSplits = [2, 4];
     how.baseline = 1;
-    reuse = 0;    
+    how.nScenes = 1;
+    reuse = 1;    
     
     eegCND = rca_getData4RCA(database, how, reuse);
     close all;
@@ -50,7 +54,7 @@ function plotSubjOZ
     saveas(gcf, filename, 'fig');
     close gcf;
     
-    row = 6;
+    row = 5;
     col = 4;
     list_subj = list_folder(fullfile(rca_path.srcEEG, database));   
 
