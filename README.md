@@ -38,5 +38,5 @@ Latest RCA code can be found here : https://github.com/dmochow/rca
 * *natSc_Analyze2D3D.m* runs RC analysis on split data and projects scenes/subject EEG..
 * *plotSubjOZ.m* plots the average OZ channel (#75) for each subjet and condition.
 * *natSc_maxDifference.m* calculates PCA Max. difference between two conditions.
-* * rcaRunAll.m*  runs RC analysis on whole dataset.
+* *rcaRunAll.m*  runs RC analysis on whole dataset.
 
