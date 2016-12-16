@@ -1,4 +1,4 @@
-function rca_Analyze2D3D(database,nScenes)
+function natSc_Analyze2D3D(database,nScenes)
 
     % Function written for NatImIVD project
     % For RCA analysis of 3D natural images across individuals or scenes
@@ -8,8 +8,8 @@ function rca_Analyze2D3D(database,nScenes)
     % 2. do rca_run, either based on subjects, or scenes. 
     % 3. Project the rca weights back into individual subject/scene space
     % 4. The following output will be saved as a result of this function
-    %       1. figures: rcaProject_GrandMeanOS.fig, rcaProject_onSubjOS.fig
-    %          plotData_1.csv and plotDataGrandMean.csv is for same visualization in R 
+    %       1. figures: rcaProject_onSubjOS.fig
+    %          plotData_1.csv or plotData_30.csv is for same visualization in R 
     %       2. rcaOnOS_bySubjects.mat: contains A and W (both are 128X3 double)
     %       3. dataRCA_OS_bySubjects:contains dataOut,This is specifically for
                % this project, a cell array subjectXcondition, within each cell, 
