@@ -1,5 +1,5 @@
 function natSc_maxDifference(nScenes)
-database = 'Middlebury';
+database = 'Live3D_new';
 rca_path = rca_setPath;
 dirResData = fullfile(rca_path.results_Data, database);
 % describing splits
@@ -49,7 +49,7 @@ cl = {'r', 'g', 'b', 'k'};
     end
     
     %% get RC weights    
-    eegCND = rca_getData4RCA(database, how, reuse);
+    eegCND = natSc_getData4RCA(database, how, reuse);
 
     maxDiff(eegCND(:, 1), eegCND(:, 2), how.splitBy, dirResData, timeCourseLen);
 end   
