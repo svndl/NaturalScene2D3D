@@ -1,4 +1,19 @@
 function nacSc_rcaOnSplitConditions(nScenes)
+
+%This function produce the first 3 RC components for 2D vs 3D conditions,
+%and plot the topography. 
+%The RCA weights (W) were obtained from rca_run. The weights were used to
+%project back to each individual space for each trial. (For example, for
+%each individual, for 2D condition, there will be 240 trials. As there are
+%21 participants, the total trials for 2D should be 21X240 = 5040. As in
+%our experiment, one subject has 300 trials instead of 240, so the total
+%trials is 5100.) Now average the projected RCA score over all the trials,
+%this will give us the RCA component score over all subjects over all
+%scenes. 
+%Note: I compared this method with first averging across all the trials and
+%then do the RCA projection. The two methods yield same results. 
+
+
     database = 'Live3D_new';
     rca_path = rca_setPath;
     dirResData = fullfile(rca_path.results_Data, database);
