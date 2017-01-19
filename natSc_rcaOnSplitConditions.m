@@ -13,6 +13,9 @@ function nacSc_rcaOnSplitConditions(nScenes)
 %Note: I compared this method with first averging across all the trials and
 %then do the RCA projection. The two methods yield same results. 
 
+%input nScenes should be 1. It is needed here because some functions depend
+%on nScenes. Otherwise it is not meaningful. 
+
 
     database = 'Live3D_new';
     rca_path = rca_setPath;
@@ -87,14 +90,35 @@ function nacSc_rcaOnSplitConditions(nScenes)
     h = cell(nCnd, 1);
     %% run the projections, plot the topography
     baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the baseline
-      
+    
+     %R 
+    dataframe2 = zeros(length(timeCourse),5); 
+%   %save mean and se to dataframe for the purpose of plotting in R. 
+    
+    
     for c = 1:nComp
         
         subplot(nComp, 2, 2*c - 1);                
-        color_idx = 1;        
+        color_idx = 1; 
+        
+        %R
+        startIdx = 1;
+        endIdx = length(timeCourse);
+        %R
+        
         for cn = nCnd:-1:1  
             [muData_C, semData_C] = natSc_ProjectmyData(eegCND(:, cn), W,baselineSample);   
-            %[muData_C, semData_C] = matSc_ProjectmyData(eegCND(:, cn), W);
+            %[muData_C, semData_C] = natSc_ProjectmyData(eegCND(:, cn), W);
+            
+            %Rfor plotting in R
+            if cn ==1
+                dataframe2(startIdx:endIdx,1:3) = [timeCourse',muData_C(:,1),semData_C(:,1)];
+                 
+             else
+                 dataframe2(startIdx:endIdx,4:5) = [muData_C(:,1),semData_C(:,1)];
+             end
+            %R
+            
             hs = shadedErrorBar(timeCourse, muData_C(:, c), semData_C(:, c), cl{color_idx}); hold on
             h{cn} = hs.patch;
             color_idx = color_idx + 1;
@@ -104,6 +128,10 @@ function nacSc_rcaOnSplitConditions(nScenes)
         subplot(nComp, 2, 2*c);
         plotOnEgi(A(:,c)); hold on;
     end
+    
+    %R
+    csvwrite(fullfile(dirResFigures,strcat('plot2Dvs3DRCA.csv')),dataframe2);
+    %R
     
     saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_', how.splitBy{:})), 'fig');
     close(gcf);     
