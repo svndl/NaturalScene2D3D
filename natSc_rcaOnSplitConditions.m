@@ -1,4 +1,4 @@
-function nacSc_rcaOnSplitConditions(nScenes)
+function natSc_rcaOnSplitConditions(nScenes)
 
 %This function produce the first 3 RC components for 2D vs 3D conditions,
 %and plot the topography. 
