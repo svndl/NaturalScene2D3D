@@ -26,7 +26,7 @@ switch database
     otherwise
 end
 
-dirResFigures = fullfile(rca_path.results_Figures, database, strcat('rcaProject', how.splitBy{:}));
+dirResFigures = fullfile(rca_path.results_Figures, database, 'Oz');
 
 if (~exist(dirResFigures, 'dir'))
     mkdir(dirResFigures);
