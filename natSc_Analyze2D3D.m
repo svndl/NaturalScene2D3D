@@ -104,7 +104,7 @@ how.useCnd = how.allCnd;
 how.nSplits = 4;
 how.useSplits = [2, 4];
 how.baseline = 0;
-reuse = 0;
+reuse = 1;
 
 
 
