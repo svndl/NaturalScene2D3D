@@ -33,17 +33,6 @@ if nargin<2 || isempty(nScenes), nScenes = 1; end
 
 rca_path = rca_setPath;
 
-
-if split ==1
-    dirResData = fullfile(rca_path.results_Data, database,'TrainedSeparatedly');
-    dirFigFol = fullfile(rca_path.results_Figures, database,'TrainedSeparatedly');
-else
-    dirResData = fullfile(rca_path.results_Data, database,'TrainedTogether');
-    dirFigFol = fullfile(rca_path.results_Figures, database,'TrainedTogether');
-    
-end
-
-
 % describing how to divide raw trials
 switch database
     case 'Live3D'
@@ -75,6 +64,40 @@ switch database
 end
 
 
+%% organizing folder
+
+how.useCnd = how.allCnd;
+how.nSplits = 4;
+how.useSplits = 2;
+%how.useSplits = [2, 4];
+how.baseline = 0;
+reuse = 1;
+
+if how.useSplits == 2||how.useSplits == 4||all(how.useSplits == [2 4])
+    
+    dirResFol = fullfile(rca_path.results_Data, database,'StimuliChunk');
+    dirFigF = fullfile(rca_path.results_Figures, database,'StimuliChunk');
+else
+    dirResFol = fullfile(rca_path.results_Data, database,'BlankChunk');
+    dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
+end
+    
+
+
+
+
+
+
+if split ==1
+    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
+    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
+else
+    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
+    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
+end
+
+
+
 
 if nScenes == 1
     dirResFigures = fullfile(dirFigFol, strcat('rcaProject', how.splitBy{:},'_bySubjects'));
@@ -98,20 +121,11 @@ cl = {'r', 'g', 'b', 'k'};
 row = 6;
 col = 5;
 
-%% load/calculate the RC data on a given dataset
-
-how.useCnd = how.allCnd;
-how.nSplits = 4;
-how.useSplits = [2, 4];
-how.baseline = 0;
-reuse = 1;
-
-
 
 %% get RC weights
 eegCND = natSc_getData4RCA(database, how, reuse);
 
-nReg = 7;
+nReg = 6;
 nComp = 3;
 
 if nScenes ==1
@@ -126,8 +140,8 @@ if split ==0
     
     
     if(~exist(rcaFileAll, 'file'))
-        [rcaDataAll, W, A, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp);
-        save(rcaFileAll, 'W', 'A','rcaDataAll');
+        [rcaDataAll,W,A,~,~,~,dGen,~] = rcaRun(eegCND', nReg, nComp);
+        save(rcaFileAll, 'W', 'A','rcaDataAll','dGen');
     else
         load(rcaFileAll);
     end
@@ -138,9 +152,9 @@ else
         nCND = size(eegCND,2);
         for nc = 1:nCND
             
-            [rcaDataAll{nc}, W{nc}, A{nc}, ~, ~, ~, ~] = rcaRun(eegCND', nReg, nComp,nc);
+            [rcaDataAll{nc}, W{nc}, A{nc}, ~, ~, ~, dGen{nc},~] = rcaRun(eegCND', nReg, nComp,nc,[],[],'orig');
         end
-        save(rcaFileAll, 'W', 'A','rcaDataAll');
+        save(rcaFileAll, 'W', 'A','rcaDataAll','dGen');
         
     else
         load(rcaFileAll);
