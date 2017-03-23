@@ -68,7 +68,7 @@ end
 
 how.useCnd = how.allCnd;
 how.nSplits = 4;
-how.useSplits = 2;
+how.useSplits = 1;
 %how.useSplits = [2, 4];
 how.baseline = 0;
 reuse = 1;
@@ -220,10 +220,10 @@ for si = 1:nSubj
         if cn ==1
             dataframe(startIdx:endIdx,1) = si;
             
-            dataframe(startIdx:endIdx,2:4) = [timeCourse',muData_C(:,1),semData_C(:,1)];
+            dataframe(startIdx:endIdx,2:4) = [timeCourse',muData_C(:,rcComp),semData_C(:,rcComp)];
             
         else
-            dataframe(startIdx:endIdx,5:6) = [muData_C(:,1),semData_C(:,1)];
+            dataframe(startIdx:endIdx,5:6) = [muData_C(:,rcComp),semData_C(:,rcComp)];
         end
         
         hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
@@ -235,12 +235,12 @@ for si = 1:nSubj
     if nScenes ==1
         title([subj_list(si) ' time course'], 'Interpreter', 'none');
     else
-        title([si ' time course'], 'Interpreter', 'none');
+        title([num2str(si) ' time course'], 'Interpreter', 'none');
     end
 end
 
 
-csvwrite(fullfile(dirResFigures,strcat('plotData_',num2str(nScenes),'.csv')),dataframe);
+csvwrite(fullfile(dirResFigures,strcat('plotData_RC',num2str(rcComp),'.csv')),dataframe);
 saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_onSubj', how.splitBy{:})), 'fig');
 
 close(gcf);
@@ -296,7 +296,7 @@ close(gcf);
 %
 %   end
 
-
-
-
 end
+
+
+

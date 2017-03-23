@@ -16,7 +16,8 @@ function dataOut = natSc_SplitEEGData(dataIn, use_conditions, all_conditions, sp
 
         for splits = 1:numel(split_by);
            %take only the splits that requested
-           matched_splits = splitted(ismember(use_conditions, split_by{splits}));
+           % can add use_conditions(:,1) here. 
+           matched_splits = splitted(ismember(use_conditions(:,1), split_by{splits}));
            dataOut{s, splits} = cat(3, matched_splits{:});
         end
     end

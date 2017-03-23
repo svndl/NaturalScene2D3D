@@ -1,4 +1,4 @@
-function [muData, semData] = natSc_ProjectmyData(data, weights,baselineSample)
+function [muData, semData,out] = natSc_ProjectmyData(data, weights,baselineSample)
     dataOut = rcaProject(data, weights);
     catData = cat(3, dataOut{:});
     muData = nanmean(catData, 3);
@@ -8,4 +8,7 @@ function [muData, semData] = natSc_ProjectmyData(data, weights,baselineSample)
     baseline = nanmean(muData(1:baselineSample,:),1);
     %muData = muData - repmat(muData(1, :), [size(muData, 1) 1]);
     muData = muData - repmat(baseline, [size(muData, 1) 1]);
+    out = squeeze(dataOut{1}(:,1,:));
+    bl = nanmean(out(1:baselineSample,:),1);
+    out = out - repmat(bl,315,1);
 end

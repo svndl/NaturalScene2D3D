@@ -1,14 +1,10 @@
-function natSc_plotSubjOZ(database,nScenes)
+function natSc_plotSubjOZ(database,nScenes,split)
 
 %This function plots the 2D vs 3D raw data from OZ (electrode 75), as well
 %as individual profile of 2D vs 3D for each subject/scene
 
 
 rca_path = rca_setPath;
-dirResData = fullfile(rca_path.results_Data, database);
-
-row = 5;
-col = 6;
 
 
 switch database
@@ -16,6 +12,7 @@ switch database
         how.allCnd = {'D', 'E'; 'D', 'O'; 'D', 'S'; 'E', 'D';'E', 'O'; 'E', 'S'; 'O', 'D'; 'O', 'E'; 'O', 'S'; 'S', 'D'; 'S', 'E'; 'S', 'O'};
         %how.splitBy = {'D', 'E', 'O', 'S'};
         how.splitBy = {'O', 'S'};
+        timeCourseLen = 660;
     case 'Middlebury'
         how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
         how.splitBy = {'O', 'S'};
@@ -23,21 +20,58 @@ switch database
     case 'Live3D_new'
         how.allCnd = {'O', 'S'; 'S', 'O'};
         how.splitBy = {'O', 'S'};
+        timeCourseLen = 750;
+
     otherwise
 end
 
-dirResFigures = fullfile(rca_path.results_Figures, database, 'Oz');
+
+
+
+
+how.useCnd = how.allCnd;
+how.nSplits = 4;
+how.useSplits = 1;
+%how.useSplits = [2, 4];
+how.baseline = 1;
+how.nScenes = nScenes;
+reuse = 1;
+
+
+if how.useSplits == 2||how.useSplits == 4||all(how.useSplits == [2 4])
+    
+    dirResFol = fullfile(rca_path.results_Data, database,'StimuliChunk');
+    dirFigF = fullfile(rca_path.results_Figures, database,'StimuliChunk');
+else
+    dirResFol = fullfile(rca_path.results_Data, database,'BlankChunk');
+    dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
+end
+    
+
+
+if split ==1
+    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
+    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
+else
+    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
+    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
+end
+
+
+
+
+row = 5;
+col = 6;
+
+
+
+dirResFigures = fullfile(dirFigFol, 'Oz');
 
 if (~exist(dirResFigures, 'dir'))
     mkdir(dirResFigures);
 end
 
-how.useCnd = how.allCnd;
-how.nSplits = 4;
-how.useSplits = [2, 4];
-how.baseline = 1;
-how.nScenes = nScenes;
-reuse = 1;
+
 
 eegCND = natSc_getData4RCA(database, how, reuse);
 close all;
