@@ -1,6 +1,6 @@
 # rcaNatScenes
 
-RCA toolbox for analyzing source EEG Data from three 3D/2D experiments.
+RCA toolbox for analyzing source EEG Data from three 3D/2D experiments
 
 Dependencies: https://github.com/svndl/rcaBase.git
 
