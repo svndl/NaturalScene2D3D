@@ -3,7 +3,7 @@ function rca_AnalyzeScenes
     %Calculate differences between scenes
     %Get OZ signal for each scene  
     
-    database = 'Live3D_new';
+    database = 'Middlebury';
     rca_path = rca_setPath;
     dirResData = fullfile(rca_path.results_Data, database);
     % describing splits
@@ -11,14 +11,14 @@ function rca_AnalyzeScenes
         case 'Live3D'
             how.allCnd = {'D', 'E'; 'D', 'O'; 'D', 'S'; 'E', 'D';'E', 'O'; 'E', 'S'; 'O', 'D'; 'O', 'E'; 'O', 'S'; 'S', 'D'; 'S', 'E'; 'S', 'O'};
             how.splitBy = {'O', 'S'};
-            nScenes = 12;
+            how.nScenes = 12;
             timeCourseLen = 660;
             row = 3;
             col = 4; 
         case 'Middlebury'
             how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
             how.splitBy = {'O', 'S'};
-            nScenes = 30;
+            how.nScenes = 30;
             timeCourseLen = 500;
             row = 5;
             col = 6;
@@ -49,7 +49,7 @@ function rca_AnalyzeScenes
     end
     
     %% get RC weights    
-    eegCND = rca_getData4RCA(database, how, reuse);
+    eegCND = natSc_getData4RCA(database, how, reuse);
     
     nReg = 7;
     nComp = 3;
