@@ -38,7 +38,7 @@ if nargin<2 , error('must specify which epoch to analyze'); end
 if nargin<1 , error('must specify which database to analyze'); end
 
 
-rca_path = rca_setPath;
+
 
 % describing how to divide raw trials
 switch database
@@ -61,9 +61,9 @@ switch database
         how.nScenes = nScenes;
         
     case 'Test'
-        how.allCnd = {'E', 'O'; 'E', 'S'; 'O', 'E'; 'O', 'S'; 'S', 'E'; 'S', 'O'};
+        how.allCnd = {'O', 'S'; 'S', 'O'};
         how.splitBy = {'O', 'S'};
-        timeCourseLen = 500;
+        timeCourseLen = 750;
         how.nScenes = nScenes;
         
         
@@ -77,34 +77,14 @@ how.useCnd = how.allCnd;
 how.nSplits = 4;
 how.useSplits = epoch;
 how.baseline = 0;
+how.split = split;
 reuse = 1;
 
-if how.useSplits == 2||how.useSplits == 4||all(how.useSplits == [2 4])
-    
-    dirResFol = fullfile(rca_path.results_Data, database,'StimuliChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'StimuliChunk');
-else
-    dirResFol = fullfile(rca_path.results_Data, database,'BlankChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
-end
-    
-%Specifies where the results are saved
-if split ==1
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
-else
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
-end
+natSc_path = natSc_setPath(database,how);
+dirResData = natSc_path.results_Data;
+dirResFigures = natSc_path.results_Figures;
 
 
-
-if nScenes == 1
-    dirResFigures = fullfile(dirFigFol, strcat('rcaProject', how.splitBy{:},'_bySubjects'));
-    
-else
-    dirResFigures = fullfile(dirFigFol, strcat('rcaProject', how.splitBy{:},'_byScenes'));
-end
 
 if (~exist(dirResFigures, 'dir'))
     mkdir(dirResFigures);
@@ -179,20 +159,20 @@ nCnd = numel(how.splitBy);
 rcComp = input('Component to visualize: ');
 
 % load subjects
-dirEEG = list_folder(fullfile(rca_path.srcEEG, database));
 
-subj_list = {dirEEG.name};
-subj_list = subj_list([dirEEG.isdir]);
 
 %%%%%%%%%%%%%%%%save data as .csv For plotting In R%%%%%%%%%%%%%%%%
-if nScenes ==1
-    
-    nSubj = numel(subj_list);
-    save(fullfile(dirResFigures,'subidx'),'subj_list'); % for the plotting in R
-    
+
+nSubj = size(eegCND,1);
+if (~exist(fullfile(natSc_path.results_Figures,'subidx.mat'), 'file'))
+    dirEEG = list_folder(fullfile(natSc_path.srcEEG, database));    
+    subj_list = {dirEEG.name};
+    subj_list = subj_list([dirEEG.isdir]);
+    save(fullfile(natSc_path.results_Figures,'subidx.mat'),'subj_list'); % for the plotting in R
 else
-    nSubj = nScenes;
+    load(fullfile(natSc_path.results_Figures,'subidx.mat'));
 end
+
 
 
 dataframe = zeros(nSubj*length(timeCourse),6);
