@@ -1,22 +1,21 @@
-function natSc_Analyze2D3D(database,nScenes,split)
+function natSc_Analyze2D3D(database,nScenes,epoch,split)
 
-% Function written for NatImIVD project
-% For RCA analysis of 3D natural images across individuals or scenes
-% Documentation of this project can be found at svndl lab wiki
+% Function written for NaturalScene2D3D project
+% For RCA analysis of 2D and 3D natural images across individuals or scenes
 % The function does the following
-% 1. rearranging the raw trials into correct format to feed in rca_run
+% 1. rearrange the raw trials into correct format to feed in rca_run
 % 2. do rca_run, either based on subjects, or scenes.
 % 3. Project the rca weights back into individual subject/scene space
 % 4. The following output will be saved as a result of this function
-%       1. figures: rcaProject_onSubjOS.fig
+%       1. figures: rcaProject_onSubjOS.fig (individual subject/scene plot)
 %          plotData_1.csv or plotData_30.csv is for same visualization in R
 %       2. rcaOnOS_bySubjects.mat: contains A and W (both are 128X3 double)
 %       3. dataRCA_OS_bySubjects:contains dataOut,This is specifically for
 % this project, a cell array subjectXcondition, within each cell,
-% timeSampleXchannelsXTrials
+% timeSample(315)XchannelsXTrials
 %       4. rcaEEG: rcaDataOut: contains subjectXcondition cell array,
 %       this is the general data structure directly extracted from raw trials. within each cell,
-%       timeSampleXchannelXtrials
+%       timeSample(1260)XchannelXtrials
 %
 %  Dependencies: https://github.com/svndl/rcaBase
 %
@@ -28,8 +27,16 @@ function natSc_Analyze2D3D(database,nScenes,split)
 %if nScenes > 1, it should be set as the number of scenes to be analyzed, and the function analyzes individual scenes
 %%If split == 1, RCA is trained on separate conditions (e.g 2D data alone or
 %3D data alone).
-if nargin<3 || isempty(split), split = 0; end
-if nargin<2 || isempty(nScenes), nScenes = 1; end
+%epoch: defines which epoch to analyze, can be 1, 2 , 3 ,4, or [1 3], [2
+%4], where 1 3 are epoches for scrambled image, 2 4 are epochs for 2D/3D
+%images
+
+
+if nargin<4 || isempty(split), split = 0; end
+if nargin<3 || isempty(nScenes), nScenes = 1; end
+if nargin<2 , error('must specify which epoch to analyze'); end
+if nargin<1 , error('must specify which database to analyze'); end
+
 
 rca_path = rca_setPath;
 
@@ -68,8 +75,7 @@ end
 
 how.useCnd = how.allCnd;
 how.nSplits = 4;
-how.useSplits = 1;
-%how.useSplits = [2, 4];
+how.useSplits = epoch;
 how.baseline = 0;
 reuse = 1;
 
@@ -82,12 +88,7 @@ else
     dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
 end
     
-
-
-
-
-
-
+%Specifies where the results are saved
 if split ==1
     dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
     dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
@@ -95,7 +96,6 @@ else
     dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
     dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
 end
-
 
 
 
@@ -118,15 +118,15 @@ end
 
 
 cl = {'r', 'g', 'b', 'k'};
-row = 6;
-col = 5;
+row = input('Number of rows for the figure of individual subject/scene: ');
+col = input('Number of columns for the figure of individual subject/scene: ');
 
 
 %% get RC weights
 eegCND = natSc_getData4RCA(database, how, reuse);
 
-nReg = 6;
-nComp = 3;
+nReg = 6; %Regularize the matrix to the first 6 component, where the elbow is in the eigen value spectrum. See page 5 of "Cortical Components of Reaction-Time during Perceptual Decisions in Humans" 
+nComp = 3; %Analyze the first 3 components
 
 if nScenes ==1
     
@@ -135,6 +135,9 @@ if nScenes ==1
 else
     rcaFileAll = fullfile(dirResData, strcat('rcaOn', how.splitBy{:}, '_byScenes.mat'));
 end
+
+%Main function to get the RCA weights, rcaOnOS_bySubjects.mat or
+%rcaOnOS_byScenes.mat will be used in other analysis 
 
 if split ==0
     
@@ -152,7 +155,7 @@ else
         nCND = size(eegCND,2);
         for nc = 1:nCND
             
-            [rcaDataAll{nc}, W{nc}, A{nc}, ~, ~, ~, dGen{nc},~] = rcaRun(eegCND', nReg, nComp,nc,[],[],'orig');
+            [rcaDataAll{nc}, W{nc}, A{nc}, ~, ~, ~, dGen{nc},~] = rcaRun(eegCND', nReg, nComp,nc);
         end
         save(rcaFileAll, 'W', 'A','rcaDataAll','dGen');
         
@@ -160,9 +163,7 @@ else
         load(rcaFileAll);
     end
     
-    
-    
-    
+
 end
 
 
@@ -174,8 +175,8 @@ end
 timeCourse = linspace(0, timeCourseLen, size(eegCND{1, 1}, 1));
 nCnd = numel(how.splitBy);
 
-%use only first component!
-rcComp = 1;
+%Specify which component to visualize
+rcComp = input('Component to visualize: ');
 
 % load subjects
 dirEEG = list_folder(fullfile(rca_path.srcEEG, database));
@@ -194,9 +195,9 @@ else
 end
 
 
-
 dataframe = zeros(nSubj*length(timeCourse),6);
 %save mean and se to dataframe for the purpose of plotting in R.
+%Columns are: time, subject, 2D mean, 2D sem, 3D mean, 3D sem. 
 
 
 close all;
@@ -205,7 +206,7 @@ baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the
 for si = 1:nSubj
     subplot(row, col, si);
     color_idx = 1;
-    startIdx = (si-1)*length(timeCourse)+1;
+    startIdx = (si-1)*length(timeCourse)+1; %for recording subject number in the dataframe for .csv file
     endIdx = si*length(timeCourse);
     for cn = 1:nCnd
         
@@ -214,9 +215,9 @@ for si = 1:nSubj
         else
             [muData_C, semData_C] = natSc_ProjectmyData(eegCND(si, cn), W,baselineSample);
         end
-        %[muData_C, semData_C] = rcaProjectmyData(eegCND(si, cn), W);
         
-        
+   %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+     
         if cn ==1
             dataframe(startIdx:endIdx,1) = si;
             
@@ -225,7 +226,8 @@ for si = 1:nSubj
         else
             dataframe(startIdx:endIdx,5:6) = [muData_C(:,rcComp),semData_C(:,rcComp)];
         end
-        
+   %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+  
         hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
         h{cn} = hs.patch;
         color_idx = color_idx + 1;
