@@ -224,7 +224,7 @@ end
 
 csvwrite(fullfile(dirResFigures,strcat('plotData_RC',num2str(rcComp),'.csv')),dataframe);
 saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_onSubj', how.splitBy{:})), 'fig');
-
+h = msgbox('Warning: do not forget to flip RCA A and W to the correct polarity, and rerun this script, so that plotData_RCx.csv is correct');
 close(gcf);
 
 %   %% project to the grand mean (Across all subjects and across all scenes)
