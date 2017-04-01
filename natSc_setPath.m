@@ -2,12 +2,18 @@ function natSc_path = natSc_setPath(database,how)
 
 %This function configures path for NaturalScene2D3D project
 
+
+
 [curr_path, ~, ~] = fileparts(mfilename('fullpath'));
 natSc_path.rootFolder = curr_path;
 %src data
 natSc_path.srcEEG = fullfile(curr_path, 'srcEEG');
 %rca-ready EEG folder
 natSc_path.rcaEEG = fullfile(curr_path, 'rcaEEG');
+
+if nargin<2 || isempty(how) 
+    return
+end
 
 
 
