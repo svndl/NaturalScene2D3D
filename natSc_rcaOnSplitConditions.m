@@ -1,4 +1,4 @@
-function natSc_rcaOnSplitConditions(database,nScenes,split)
+function natSc_rcaOnSplitConditions(database,nScenes,epoch, split)
 
 %This function produce the first 3 RC components for 2D vs 3D conditions,
 %and plot the topography.
@@ -18,7 +18,7 @@ function natSc_rcaOnSplitConditions(database,nScenes,split)
 %input nScenes should be 1. It is needed here because some functions depend
 %on nScenes. Otherwise it is not meaningful.
 
-rca_path = rca_setPath;
+
 
 % describing splits
 
@@ -52,40 +52,15 @@ end
 
 
 how.useCnd = how.allCnd;
-
 how.nSplits = 4;
-how.useSplits = 1;
-%how.useSplits = [2, 4];
+how.useSplits = epoch;
 how.baseline = 0;
+how.split = split;
 reuse = 1;
 
-
-if how.useSplits == 2||how.useSplits == 4||all(how.useSplits == [2 4])
-    
-    dirResFol = fullfile(rca_path.results_Data, database,'StimuliChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'StimuliChunk');
-else
-    dirResFol = fullfile(rca_path.results_Data, database,'BlankChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
-end
-    
-
-
-
-if split ==1
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
-else
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
-end
-
-
-
-    dirResFigures = fullfile(dirFigFol, strcat('rcaProjectOS'));
-    
-
-    
+natSc_path = natSc_setPath(database,how);
+dirResData = natSc_path.results_Data;
+dirResFigures = natSc_path.results_Figures;
 
 if (~exist(dirResFigures, 'dir'))
     mkdir(dirResFigures);
@@ -112,6 +87,7 @@ if split ==0
         [rcaDataAll,W,A,~,~,~,dGen,~] = rcaRun(eegCND', nReg, nComp);
         save(rcaFileAll, 'W', 'A','rcaDataAll','dGen');
     else
+        h = msgbox('Make sure the RCA A and W polarity are correct!');
         load(rcaFileAll);
     end
     
@@ -126,12 +102,11 @@ else
         save(rcaFileAll, 'W', 'A','rcaDataAll','dGen');
         
     else
+        h = msgbox('Make sure the RCA A and W polarity are correct!');
         load(rcaFileAll);
     end
     
-    
-    
-    
+  
 end
 
 
@@ -228,11 +203,8 @@ else
     end
     
     saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_', how.splitBy{:})), 'fig');
-    %close(gcf);
-    
-    
-    
-    
+    close(gcf);
+       
     
 end
 end
