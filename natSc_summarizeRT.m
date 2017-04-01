@@ -1,6 +1,10 @@
 function [meanAccuracy,meanRT] = natSc_summarizeRT(database)
-rca_path = rca_setPath;
-eegSrc = fullfile(rca_path.srcEEG, database);
+
+%This function calculates mean accuracy and RT
+
+
+natSc_path = natSc_setPath(database);
+eegSrc = fullfile(natSc_path.srcEEG, database);
 
 proj_dir = eegSrc;
 
