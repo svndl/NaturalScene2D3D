@@ -1,5 +1,10 @@
 function [muData, semData,out] = natSc_ProjectmyData(data, weights,baselineSample)
+
+%This function calculates the mean and standard error of each RC component.
+
     dataOut = rcaProject(data, weights);
+    
+    %commented out is the original calculation strategy written by Alexandra. 
     %catData = cat(3, dataOut{:});
     %muData = nanmean(catData, 3);
     %semData = nanstd(catData, [], 3)/(sqrt(size(catData, 3))); %This sem
