@@ -1,16 +1,12 @@
-function natSc_plotSubjOZ(database,nScenes,split)
+function natSc_plotSubjOZ(database,nScenes,epoch,split)
 
 %This function plots the 2D vs 3D raw data from OZ (electrode 75), as well
 %as individual profile of 2D vs 3D for each subject/scene
 
 
-rca_path = rca_setPath;
-
-
 switch database
     case 'Live3D'
         how.allCnd = {'D', 'E'; 'D', 'O'; 'D', 'S'; 'E', 'D';'E', 'O'; 'E', 'S'; 'O', 'D'; 'O', 'E'; 'O', 'S'; 'S', 'D'; 'S', 'E'; 'S', 'O'};
-        %how.splitBy = {'D', 'E', 'O', 'S'};
         how.splitBy = {'O', 'S'};
         timeCourseLen = 660;
     case 'Middlebury'
@@ -21,7 +17,11 @@ switch database
         how.allCnd = {'O', 'S'; 'S', 'O'};
         how.splitBy = {'O', 'S'};
         timeCourseLen = 750;
-
+    case 'Test'
+        how.allCnd = {'O', 'S'; 'S', 'O'};
+        how.splitBy = {'O', 'S'};
+        timeCourseLen = 750;
+        
     otherwise
 end
 
@@ -31,41 +31,26 @@ end
 
 how.useCnd = how.allCnd;
 how.nSplits = 4;
-how.useSplits = 1;
-%how.useSplits = [2, 4];
+how.useSplits = epoch;
 how.baseline = 1;
 how.nScenes = nScenes;
 reuse = 1;
+how.split = split;
 
-
-if how.useSplits == 2||how.useSplits == 4||all(how.useSplits == [2 4])
-    
-    dirResFol = fullfile(rca_path.results_Data, database,'StimuliChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'StimuliChunk');
-else
-    dirResFol = fullfile(rca_path.results_Data, database,'BlankChunk');
-    dirFigF = fullfile(rca_path.results_Figures, database,'BlankChunk');
-end
-    
-
-
-if split ==1
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedSeparatedly']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedSeparatedly']);
-else
-    dirResData = fullfile(dirResFol,[num2str(how.useSplits),'TrainedTogether']);
-    dirFigFol = fullfile(dirFigF, [num2str(how.useSplits),'TrainedTogether']);
-end
+natSc_path = natSc_setPath(database,how);
+dirResData = natSc_path.results_Data;
+dirResFigures = fullfile(fileparts(natSc_path.results_Figures),'Oz');
 
 
 
 
-row = 5;
-col = 6;
 
 
 
-dirResFigures = fullfile(dirFigFol, 'Oz');
+row = input('Number of rows for the figure of individual subject/scene: ');
+col = input('Number of columns for the figure of individual subject/scene: ');
+
+
 
 if (~exist(dirResFigures, 'dir'))
     mkdir(dirResFigures);
@@ -73,9 +58,22 @@ end
 
 
 
+
+
+
+
 eegCND = natSc_getData4RCA(database, how, reuse);
 close all;
 nSubj = size(eegCND, 1);
+if (~exist(fullfile(natSc_path.results_Figures,'subidx.mat'), 'file'))
+    dirEEG = list_folder(fullfile(natSc_path.srcEEG, database));
+    subj_list = {dirEEG.name};
+    subj_list = subj_list([dirEEG.isdir]);
+    save(fullfile(natSc_path.results_Figures,'subidx.mat'),'subj_list'); % for the plotting in R
+else
+    load(fullfile(natSc_path.results_Figures,'subidx.mat'));
+end
+
 
 cndNotStereo = eegCND(:, 1);
 cndStereo = eegCND(:, 2);
@@ -88,7 +86,7 @@ baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the
 nS_all = cat(3, cndNotStereo{:});
 S_all = cat(3, cndStereo{:});
 
-%For plotting 2D vs 3D grand mean 
+%For plotting 2D vs 3D grand mean
 OZ_O_all_mean = nanmean(squeeze(nS_all(:, 75, :)), 2);
 baseline = nanmean(OZ_O_all_mean(1:baselineSample,:),1);
 OZ_O_all_mean_bs = OZ_O_all_mean - repmat(baseline, [size(OZ_O_all_mean, 1) 1]);
@@ -123,17 +121,11 @@ close gcf;
 
 
 
-if nScenes == 1
-    list_subj = list_folder(fullfile(rca_path.srcEEG, database));
-    save('subidx','list_subj'); % for the plotting in R
-end
 dataframe = zeros(nSubj*length(timeCourse),6);
 
 for ns = 1:nSubj
     startIdx = (ns-1)*length(timeCourse)+1;
     endIdx = ns*length(timeCourse);
-    
-    
     
     nStereo = cndNotStereo{ns};
     Stereo = cndStereo{ns};
@@ -168,13 +160,13 @@ for ns = 1:nSubj
     p1 = shadedErrorBar(timeCourse, oz_nS_mean_bs, oz_nS_sem, 'r'); hold on
     p2=shadedErrorBar(timeCourse, oz_S_mean_bs, oz_S_sem, 'g');
     
-
+    
     
     legend([p1.mainLine,p2.mainLine],{strcat(how.splitBy{1}, '-Oz'), strcat(how.splitBy{2}, '-Oz')});
     if nScenes == 1
         
         
-        title(strcat('Subj ', list_subj(ns).name));
+        title(strcat('Subj ', subj_list(ns)));
     else
         title(strcat('Scene ', num2str(list_subj(ns))));
     end
