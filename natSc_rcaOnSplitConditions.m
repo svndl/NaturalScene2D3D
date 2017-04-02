@@ -1,4 +1,4 @@
-function natSc_rcaOnSplitConditions(database,nScenes,epoch, split)
+function natSc_rcaOnSplitConditions(database,nScenes,epoch,split)
 
 %This function produce the first 3 RC components for 2D vs 3D conditions,
 %and plot the topography.
@@ -193,6 +193,7 @@ else
             
             subplot(nComp, 3, 3*c -2+cn );
             mrC.plotOnEgi(A{cn}(:,c)); hold on;
+            colorbar;
             title(['RC' num2str(c),':',num2str(cn+1),'D']);
         end
         csvwrite(fullfile(dirResFigures,strcat('plot2Dvs3DRCA_RC',num2str(c),'.csv')),dataframe2);
