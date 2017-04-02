@@ -1,0 +1,27 @@
+---
+title: "Figure4CSVfile"
+author: "Karen Duan"
+date: "4/1/2017"
+output: html_document
+---
+
+```{r}
+library(tidyr)
+setwd('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/Live3D_new/StimuliChunk/2TrainedSeparatedly/')
+
+df_raw <- read.csv('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/figures/Live3D_new/StimuliChunk/2TrainedSeparatedly/rcaProjectOS_bySubjects/plotData_RC1.csv', header=F)
+
+#### for 2D vs Blank
+df <- df_raw[,c(1,2,3)]
+names(df) <- c('Subject','Time','2D')
+df_wide<- spread(df,Time,'2D')
+write.csv(df_wide,'2DRC1.csv')
+###
+
+#### for 3D vs Blank
+df <- df_raw[,c(1,2,5)]
+names(df) <- c('Subject','Time','3D')
+df_wide<- spread(df,Time,'3D')
+write.csv(df_wide,'3DRC3.csv')
+###
+```

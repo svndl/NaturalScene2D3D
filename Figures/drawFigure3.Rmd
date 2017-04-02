@@ -1,0 +1,19 @@
+---
+title: "DrawFigure3"
+author: "Karen Duan"
+date: "4/1/2017"
+output: html_document
+---
+
+```{r}
+
+#VarianceExplained.csv is the output from rcaRun.m, the dGen, eigen values. If RCA is trained separatedly, the eigenvalues are averaged across conditions. 
+
+data <- read.csv('~/Dropbox/Research/4_IndividualDifferences/Paper/VarianceExplained.csv',header=T)
+library(ggplot2)
+ggplot(data[1:10,],aes(x = as.factor(c(1:10)),y=VarianceExplained,group=1)) + geom_point(size=2) + geom_line(size=1) + ylab('% Reliability Explained') +xlab('RC Component') +theme_classic()+scale_y_continuous(breaks=c(0,0.1,0.2,0.3,0.4),labels = c('0','10','20','30','40'))+theme(axis.text=element_text(size=12),axis.title=element_text(size=14)) 
+ggsave('ReliabilityExplained.pdf',path='~/Dropbox',width = 8, height = 4, units = "in")
+
+```
+
+
