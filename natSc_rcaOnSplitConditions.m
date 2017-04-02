@@ -157,6 +157,7 @@ if split ==0
         title(['RC' num2str(c) ' time course']);
         subplot(nComp, 2, 2*c);
         mrC.plotOnEgi(A(:,c)); hold on;
+        colorbar;
     end
     
     saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_', how.splitBy{:})), 'fig');
