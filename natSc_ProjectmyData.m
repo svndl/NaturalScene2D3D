@@ -25,5 +25,5 @@ function [muData, semData,out] = natSc_ProjectmyData(data, weights,baselineSampl
     %ranking
     out = squeeze(dataOut{1}(:,1,:));
     bl = nanmean(out(1:baselineSample,:),1);
-    out = out - repmat(bl,315,1);
+    out = out - repmat(bl,size(out,1),1);
 end
