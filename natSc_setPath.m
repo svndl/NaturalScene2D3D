@@ -48,6 +48,13 @@ else
     natSc_path.results_Data = fullfile(results_Data_Folder, 'byScene');
 end
 
-
 natSc_path.ratings = fullfile(curr_path, 'ratings');
+
+if ~exist(natSc_path.results_Data,'dir')
+    mkdir(natSc_path.results_Data);
+end
+
+if ~exist(natSc_path.results_Figures,'dir')
+    mkdir(natSc_path.results_Figures);
+end
 end
