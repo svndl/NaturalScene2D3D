@@ -5,12 +5,13 @@ permutationResultFolder = '~/Dropbox/Research/4_IndividualDifferences/NaturalSce
 cd(permutationResultFolder);
 
 if ~exist(strcat('permutationTestResults.mat'),'file')
-    for nComp = 1
+    for nComp = 1:3
         
         data = csvread(strcat('inputForPermutationTest',num2str(nComp),'.csv'));
         %This file is from R script: Figure5inputForPermutationTest.rmd
         %21X315,subject by time, should be tranposed into timeXsubject
-        [realT(:,nComp),realP(:,nComp),corrT(:,nComp),critVal(:,nComp),clustDistrib(:,nComp)]= ttest_permute(data',10000); 
+        realT(:,nComp),realP(:,nComp),corrT(:,nComp),critVal(:,nComp),clustDistrib(:,nComp)]= ttest_permute(data',10000); 
+
     end
     save('permutationTestResults.mat','realT','realP','corrT','critVal','clustDistrib');
 else
