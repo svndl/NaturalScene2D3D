@@ -23,7 +23,8 @@ function [muData, semData,out] = natSc_ProjectmyData(data, weights,baselineSampl
     muData = muData - repmat(baseline, [size(muData, 1) 1]);
     %Below is only needed for the permutation test in individual difference
     %ranking
-    out = squeeze(dataOut{1}(:,1,:));
+    nComp =1;
+    out = squeeze(dataOut{1}(:,nComp,:)); %
     bl = nanmean(out(1:baselineSample,:),1);
     out = out - repmat(bl,size(out,1),1);
 end
