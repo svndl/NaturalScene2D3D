@@ -4,7 +4,7 @@ function drawFigure5
 permutationResultFolder = '~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/Live3D_new/StimuliChunk/2TrainedSeparatedly/bySubject';
 cd(permutationResultFolder);
 
-if ~exist(strcat('permutationTestResults.mat'),'file')
+if ~exist(fullfile(permutationResultFolder,'permutationTestResults.mat'),'file')
     for nComp = 1:3
         
         data = csvread(strcat('inputForPermutationTest',num2str(nComp),'.csv'));
