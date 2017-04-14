@@ -1,7 +1,7 @@
-function drawFigure5
+function drawFigure5(database)
 %Function to draw figure 5. 
 
-permutationResultFolder = '~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/Live3D_new/StimuliChunk/2TrainedSeparatedly/bySubject';
+permutationResultFolder = strcat('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/',database,'/StimuliChunk/2TrainedSeparatedly/bySubject');
 cd(permutationResultFolder);
 
 if ~exist(fullfile(permutationResultFolder,'permutationTestResults.mat'),'file')
@@ -10,7 +10,7 @@ if ~exist(fullfile(permutationResultFolder,'permutationTestResults.mat'),'file')
         data = csvread(strcat('inputForPermutationTest',num2str(nComp),'.csv'));
         %This file is from R script: Figure5inputForPermutationTest.rmd
         %21X315,subject by time, should be tranposed into timeXsubject
-        realT(:,nComp),realP(:,nComp),corrT(:,nComp),critVal(:,nComp),clustDistrib(:,nComp)]= ttest_permute(data',10000); 
+        [realT(:,nComp),realP(:,nComp),corrT(:,nComp),critVal(:,nComp),clustDistrib(:,nComp)]= ttest_permute(data',10000); 
 
     end
     save('permutationTestResults.mat','realT','realP','corrT','critVal','clustDistrib');
@@ -25,7 +25,7 @@ fontSize = 12;
 lWidth =2; 
 gcaOpts = {'tickdir','out','box','off','fontsize',fontSize,'fontname','arial','linewidth',lWidth,'ticklength',[.025,.025]};
 
-load('Live3D_newdata4RCA_OS_bySubjects.mat');
+load(strcat(database,'data4RCA_OS_bySubjects.mat'));
 
 
 eegCND=dataOut;
@@ -33,7 +33,15 @@ load('rcaOnOS_bySubjects.mat');
 
 baselineSample = 21; % first 50ms as baseline
 cl = {'b', 'r', 'g', 'k'};
-timeCourse = linspace(0, 750, size(eegCND{1, 1}, 1));
+if strcmp(database,'Middlebury')
+    timeCourLen = 500;
+elseif strcmp(database,'Live3D')
+    timeCourLen = 660;
+else
+    timeCourLen = 750;
+end
+    
+timeCourse = linspace(0, timeCourLen, size(eegCND{1, 1}, 1));
 
  for cn = 1:2 
      [muData_C{cn}, semData_C{cn}] =natSc_ProjectmyData(eegCND(:, cn), W{cn},baselineSample); 
@@ -43,6 +51,7 @@ figure;
 for z=1:3
     hh(z)=subplot(3,1,z);
     ylim([-7e-6 1.2e-5])
+    %ylim([-1.5e-5 1.5e-5])%middlbury only
     xlim([0 850])
     hold on
      
