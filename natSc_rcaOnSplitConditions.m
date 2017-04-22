@@ -106,7 +106,7 @@ else
         load(rcaFileAll);
     end
     
-  
+    
 end
 
 
@@ -117,7 +117,12 @@ cl = {'r', 'g', 'b', 'k'};
 timeCourse = linspace(0, timeCourseLen, size(eegCND{1, 1}, 1));
 
 close all;
-nCnd = numel(how.splitBy);
+if epoch ==1
+    nCnd = 1;
+else
+    nCnd = numel(how.splitBy);
+    
+end
 h = cell(nCnd, 1);
 %% run the projections, plot the topography
 baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the baseline
@@ -125,39 +130,76 @@ baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the
 
 
 if split ==0
-    
+    for sub = 1:size(eegCND,1)
+        
+        eegCND_combined{sub,1} = cat(3,eegCND{sub,1},eegCND{sub,2});
+        
+    end
+    [muData_C, semData_C] = natSc_ProjectmyData(eegCND_combined, W,baselineSample);
     
     for c = 1:nComp
         
-        subplot(nComp, 2, 2*(c) - 1);
-        color_idx = 1;
         
-        dataframe2 = zeros(length(timeCourse),5);
-        for cn = nCnd:-1:1
-            [muData_C, semData_C] = natSc_ProjectmyData(eegCND(:, cn), W,baselineSample);
+        if epoch ==1
             
+            subplot(nComp, 2, 2*(c) - 1);
+            color_idx = 1;
+            
+            dataframe2 = zeros(length(timeCourse),3);%subjNum, 2Dmean, 2Dsem.
             %Rfor plotting in R
             
-            if cn ==1
-                dataframe2(:,1:3) = [timeCourse',muData_C(:,c),semData_C(:,c)];
-                
-            else
-                dataframe2(:,4:5) = [muData_C(:,c),semData_C(:,c)];
-            end
+            
+            dataframe2(:,1:3) = [timeCourse',muData_C(:,c),semData_C(:,c)];
+            
             
             
             %R
             
             hs = shadedErrorBar(timeCourse, muData_C(:, c), semData_C(:, c), cl{color_idx}); hold on
-            h{cn} = hs.patch;
-            color_idx = color_idx + 1;
+            
+            
+            
+            csvwrite(fullfile(dirResFigures,strcat('Interval1_TrainedTogether_RC',num2str(c),'.csv')),dataframe2);
+            hold on;
+            title(['RC' num2str(c) ' time course']);
+            subplot(nComp, 2, 2*c);
+            mrC.plotOnEgi(A(:,c)); hold on;
+            %colorbar;
+            
+            
+            
+        else
+            
+            subplot(nComp, 2, 2*(c) - 1);
+            color_idx = 1;
+            
+            dataframe2 = zeros(length(timeCourse),5);
+            for cn = nCnd:-1:1
+                [muData_C, semData_C] = natSc_ProjectmyData(eegCND(:, cn), W,baselineSample);
+                
+                %Rfor plotting in R
+                
+                if cn ==1
+                    dataframe2(:,1:3) = [timeCourse',muData_C(:,c),semData_C(:,c)];
+                    
+                else
+                    dataframe2(:,4:5) = [muData_C(:,c),semData_C(:,c)];
+                end
+                
+                
+                %R
+                
+                hs = shadedErrorBar(timeCourse, muData_C(:, c), semData_C(:, c), cl{color_idx}); hold on
+                h{cn} = hs.patch;
+                color_idx = color_idx + 1;
+            end
+            csvwrite(fullfile(dirResFigures,strcat('plot2Dvs3DRCA_TrainedTogether_RC',num2str(c),'.csv')),dataframe2);
+            legend([h{end:-1:1}], [how.splitBy{end:-1:1}]'); hold on;
+            title(['RC' num2str(c) ' time course']);
+            subplot(nComp, 2, 2*c);
+            mrC.plotOnEgi(A(:,c)); hold on;
+            %colorbar;
         end
-        csvwrite(fullfile(dirResFigures,strcat('plot2Dvs3DRCA_TrainedTogether_RC',num2str(c),'.csv')),dataframe2);
-        legend([h{end:-1:1}], [how.splitBy{end:-1:1}]'); hold on;
-        title(['RC' num2str(c) ' time course']);
-        subplot(nComp, 2, 2*c);
-        mrC.plotOnEgi(A(:,c)); hold on;
-        colorbar;
     end
     
     saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_', how.splitBy{:})), 'fig');
@@ -194,7 +236,7 @@ else
             
             subplot(nComp, 3, 3*c -2+cn );
             mrC.plotOnEgi(A{cn}(:,c)); hold on;
-            colorbar;
+            %colorbar;
             title(['RC' num2str(c),':',num2str(cn+1),'D']);
         end
         csvwrite(fullfile(dirResFigures,strcat('plot2Dvs3DRCA_RC',num2str(c),'.csv')),dataframe2);
@@ -206,7 +248,7 @@ else
     
     saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_', how.splitBy{:})), 'fig');
     close(gcf);
-       
+    
     
 end
 end
