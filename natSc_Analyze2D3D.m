@@ -86,16 +86,6 @@ dirResFigures = natSc_path.results_Figures;
 
 
 
-if (~exist(dirResFigures, 'dir'))
-    mkdir(dirResFigures);
-end
-if (~exist(dirResData, 'dir'))
-    mkdir(dirResData);
-end
-
-
-
-
 
 cl = {'r', 'g', 'b', 'k'};
 row = input('Number of rows for the figure of individual subject/scene: ');
@@ -105,7 +95,7 @@ col = input('Number of columns for the figure of individual subject/scene: ');
 %% get RC weights
 eegCND = natSc_getData4RCA(database, how, reuse);
 
-nReg = 6; %Regularize the matrix to the first 6 component, where the elbow is in the eigen value spectrum. See page 5 of "Cortical Components of Reaction-Time during Perceptual Decisions in Humans" 
+nReg = 6; %Regularize the matrix to the first 6 component, where the elbow is in the eigen value spectrum. See page 5 of "Cortical Components of Reaction-Time during Perceptual Decisions in Humans"
 nComp = 3; %Analyze the first 3 components
 
 if nScenes ==1
@@ -117,7 +107,7 @@ else
 end
 
 %Main function to get the RCA weights, rcaOnOS_bySubjects.mat or
-%rcaOnOS_byScenes.mat will be used in other analysis 
+%rcaOnOS_byScenes.mat will be used in other analysis
 
 if split ==0
     
@@ -143,7 +133,7 @@ else
         load(rcaFileAll);
     end
     
-
+    
 end
 
 
@@ -160,68 +150,113 @@ rcComp = input('Component to visualize: ');
 
 % load subjects
 
-
 %%%%%%%%%%%%%%%%save data as .csv For plotting In R%%%%%%%%%%%%%%%%
 
 nSubj = size(eegCND,1);
 if (~exist(fullfile(natSc_path.results_Figures,'subidx.mat'), 'file'))
-    dirEEG = list_folder(fullfile(natSc_path.srcEEG, database));    
+    dirEEG = list_folder(fullfile(natSc_path.srcEEG, database));
     subj_list = {dirEEG.name};
     subj_list = subj_list([dirEEG.isdir]);
     save(fullfile(natSc_path.results_Figures,'subidx.mat'),'subj_list'); % for the plotting in R
 else
     load(fullfile(natSc_path.results_Figures,'subidx.mat'));
 end
-
-
-
-dataframe = zeros(nSubj*length(timeCourse),6);
-%save mean and se to dataframe for the purpose of plotting in R.
-%Columns are: time, subject, 2D mean, 2D sem, 3D mean, 3D sem. 
-
-
-close all;
-
 baselineSample = round(50/timeCourseLen*length(timeCourse)); %First 50 ms as the baseline
-for si = 1:nSubj
-    subplot(row, col, si);
-    color_idx = 1;
-    startIdx = (si-1)*length(timeCourse)+1; %for recording subject number in the dataframe for .csv file
-    endIdx = si*length(timeCourse);
-    for cn = 1:nCnd
+
+
+
+
+
+
+
+if epoch ==1
+    for sub = 1:size(eegCND,1)
         
-        if split == 1
-            [muData_C, semData_C] = natSc_ProjectmyData(eegCND(si, cn), W{cn},baselineSample);
-        else
-            [muData_C, semData_C] = natSc_ProjectmyData(eegCND(si, cn), W,baselineSample);
-        end
+        eegCND_combined{sub,1} = cat(3,eegCND{sub,1},eegCND{sub,2});
         
-   %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
-     
-        if cn ==1
-            dataframe(startIdx:endIdx,1) = si;
-            
-            dataframe(startIdx:endIdx,2:4) = [timeCourse',muData_C(:,rcComp),semData_C(:,rcComp)];
-            
-        else
-            dataframe(startIdx:endIdx,5:6) = [muData_C(:,rcComp),semData_C(:,rcComp)];
-        end
-   %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
-  
-        hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
-        h{cn} = hs.patch;
-        color_idx = color_idx + 1;
     end
-    legend([h{end:-1:1}], [how.splitBy{end:-1:1}]'); hold on;
+    dataframe = zeros(nSubj*length(timeCourse),4);%time, subject, 2D mean, 2D sem
+    close all;
     
-    if nScenes ==1
-        title([subj_list(si) ' time course'], 'Interpreter', 'none');
-    else
-        title([num2str(si) ' time course'], 'Interpreter', 'none');
+    for si = 1:nSubj
+        subplot(row, col, si);
+        color_idx = 1;
+        startIdx = (si-1)*length(timeCourse)+1; %for recording subject number in the dataframe for .csv file
+        endIdx = si*length(timeCourse);
+        
+        [muData_C, semData_C] = natSc_ProjectmyData(eegCND_combined(si, 1), W,baselineSample);
+        
+        
+        %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+        
+        
+        dataframe(startIdx:endIdx,1) = si;
+        
+        dataframe(startIdx:endIdx,2:4) = [timeCourse',muData_C(:,rcComp),semData_C(:,rcComp)];
+        
+        
+        %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+        
+        hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
+        
+        if nScenes ==1
+            title([subj_list(si) ' time course'], 'Interpreter', 'none');
+        else
+            title([num2str(si) ' time course'], 'Interpreter', 'none');
+        end
+        
+        
     end
+    hold on;
+    
+    
+else
+    dataframe = zeros(nSubj*length(timeCourse),6);
+    %save mean and se to dataframe for the purpose of plotting in R.
+    %Columns are: time, subject, 2D mean, 2D sem, 3D mean, 3D sem.
+    
+    
+    close all;
+    
+    for si = 1:nSubj
+        subplot(row, col, si);
+        color_idx = 1;
+        startIdx = (si-1)*length(timeCourse)+1; %for recording subject number in the dataframe for .csv file
+        endIdx = si*length(timeCourse);
+        for cn = 1:nCnd
+            
+            if split == 1
+                [muData_C, semData_C] = natSc_ProjectmyData(eegCND(si, cn), W{cn},baselineSample);
+            else
+                [muData_C, semData_C] = natSc_ProjectmyData(eegCND(si, cn), W,baselineSample);
+            end
+            
+            %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+            
+            if cn ==1
+                dataframe(startIdx:endIdx,1) = si;
+                
+                dataframe(startIdx:endIdx,2:4) = [timeCourse',muData_C(:,rcComp),semData_C(:,rcComp)];
+                
+            else
+                dataframe(startIdx:endIdx,5:6) = [muData_C(:,rcComp),semData_C(:,rcComp)];
+            end
+            %%%%%%%%%%%%%%%% For plotting In R%%%%%%%%%%%%%%%%
+            
+            hs = shadedErrorBar(timeCourse, muData_C(:, rcComp), semData_C(:, rcComp), cl{color_idx}); hold on
+            h{cn} = hs.patch;
+            color_idx = color_idx + 1;
+        end
+        legend([h{end:-1:1}], [how.splitBy{end:-1:1}]'); hold on;
+        
+        if nScenes ==1
+            title([subj_list(si) ' time course'], 'Interpreter', 'none');
+        else
+            title([num2str(si) ' time course'], 'Interpreter', 'none');
+        end
+    end
+    
 end
-
-
 csvwrite(fullfile(dirResFigures,strcat('plotData_RC',num2str(rcComp),'.csv')),dataframe);
 saveas(gcf, fullfile(dirResFigures, strcat('rcaProject_onSubj', how.splitBy{:})), 'fig');
 h = msgbox('Warning: do not forget to flip RCA A and W to the correct polarity, and rerun this script, so that plotData_RCx.csv is correct');
