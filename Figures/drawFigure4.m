@@ -1,5 +1,5 @@
 function drawFigure4
-nSubj = 21;
+nSubj = 24;
 epochLengh=315;
 baselineSample=21;
 fontSize = 12;
@@ -9,7 +9,7 @@ timeCourseLen = 750;
 timeCourse = linspace(0, timeCourseLen, 315);
 nComp = 3;
 topFolder = '~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/Live3D_new/';
-resultFolder = fullfile(topFolder,'StimuliChunk/2TrainedSeparatedly');
+resultFolder = fullfile(topFolder,'StimuliChunk/2TrainedSeparatedly/bySubject');
 cd(resultFolder);
 %For Blank
 %load the rca w for drawing blank chunk
@@ -22,7 +22,7 @@ for i=1:nSubj
 end
 
 projOut = rcaProject(eegCND, W); 
-if ~exist('2DvsBlankpermutationTestResults.mat','file')
+if ~exist(fullfile(resultFolder,'2DvsBlankpermutationTestResults.mat'),'file')
     for nComp = 1:3
         
         blank{nComp} = cellfun(@(x) x(:,nComp,:),projOut, 'UniformOutput',false);
