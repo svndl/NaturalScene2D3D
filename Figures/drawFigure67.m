@@ -1,32 +1,50 @@
-function drawFigure67(byWhich)
+function drawFigure67(database,byWhich)
 %Function to rank individual subjects/Scene by their 2D 3D waveforms Eucledian
 %distances
 %input --byWhich:string, 'bySubject' or 'byScene
 
 baselineSample = 21; 
 cl = {'b', 'r'};
-nComp = 1; %which component to plot; 
+nComp = 1; %which component to plot; %change component in natSc_ProjectmyData
+
+
+h = msgbox('Warning: Check natSc_ProjectmyData component,use dbcont to continue');
+%keyboard;
+
 if strcmp(byWhich,'bySubject') %row and columns of the plots
-    nrow = 7; ncol = 3;
+    %nrow = 7; ncol = 3;
+    nrow = 6; ncol = 4;
 else
     nrow = 6; ncol = 5;
 end
 
-topFolder = '~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/Live3D_new/StimuliChunk/2TrainedSeparatedly';
-data = csvread(fullfile(topFolder,byWhich,'inputForPermutationTest1.csv'));
+topFolder = strcat('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/',database,'/StimuliChunk/2TrainedSeparatedly');
+
+
+data = csvread(fullfile(topFolder,byWhich,strcat('inputForPermutationTest',num2str(nComp),'.csv')));
 for s = 1:size(data,1)
     d(s) = sqrt(data(s,:)*data(s,:)'); %distance to 0   
 end
 [x,subOrder] = sort(d,'descend');%This index is the index to be used to
     %extract largest to smallest from the original data matrix.
 
-load(fullfile(topFolder,byWhich,strcat('Live3D_newdata4RCA_OS_',byWhich,'s.mat')));
+load(fullfile(topFolder,byWhich,strcat(database,'data4RCA_OS_',byWhich,'s.mat')));
+
 eegCND=dataOut;
-timeCourse = linspace(0, 750, size(eegCND{1, 1}, 1));
+if strcmp(database,'Middlebury')
+    timeCourLen = 500;
+elseif strcmp(database,'Live3D')
+    timeCourLen = 660;
+else
+    timeCourLen = 750;
+end
+    
+
+
+timeCourse = linspace(0, timeCourLen, size(eegCND{1, 1}, 1));
 
 load(fullfile(topFolder,byWhich,strcat('rcaOnOS_',byWhich,'s.mat')));
-load(strcat('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/figures/Live3D_new/StimuliChunk/2TrainedSeparatedly/',byWhich,'/subidx.mat'));
-
+load(strcat('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/figures/',database,'/StimuliChunk/2TrainedSeparatedly/',byWhich,'/subidx.mat'));
 
 
 tHotColMap = jmaColors('pval');
@@ -36,12 +54,14 @@ lWidth =2;
 gcaOpts = {'tickdir','out','box','off','fontsize',fontSize,'fontname','arial','linewidth',lWidth,'ticklength',[.025,.025]};
 
 
+
 for sub = 1:size(data,1)
     
     for cn = 1:2
         [muData_C{sub,cn}, semData_C{sub,cn},out{sub,cn}] =natSc_ProjectmyData(eegCND(sub, cn), W{cn},baselineSample);
     end
-    diffmat = out{sub,1}-out{sub,2};
+    ntrial = min(size(out{sub,1},2), size(out{sub,1},2));
+    diffmat = out{sub,1}(:,1:ntrial)-out{sub,2}(:,1:ntrial);
     [realT(:,sub),realP(:,sub),corrT(:,sub),critVal(:,sub),clustDistrib(:,sub)]= ttest_permute(diffmat,1000);
     
 end
@@ -52,7 +72,7 @@ plotidx = 1;
 for si = subOrder
 
     subplot(nrow, ncol,plotidx);
-    
+    set(gca,'YTickLabel','')
     hh(plotidx)=subplot(nrow,ncol,plotidx);hold on;
     ylim([-3e-5 3e-5])
     xlim([0 850])
@@ -61,7 +81,7 @@ for si = subOrder
     for cn = 1:2
         subplot(hh(plotidx));
         hs = shadedErrorBar(timeCourse, muData_C{si,cn}(:, nComp), semData_C{si,cn}(:, nComp), cl{cn}); hold on
-        h{cn} = hs.patch;
+        
         
     end
     title(subj_list(si), 'Interpreter', 'none');
@@ -78,7 +98,7 @@ for si = subOrder
     % then put a * there
     
     meanResult = load(fullfile(topFolder,byWhich,'permutationTestResults.mat')); 
-    meanCritV = meanResult.critVal(1);%First component
+    meanCritV = meanResult.critVal(nComp);%First component
     %Compare each individual result with the critical value derived from
     %the permutation test of the whole data set
 
@@ -117,6 +137,7 @@ set(gcf,'PaperPosition',[0 0 9 11])
 if strcmp(byWhich,'bySubject') %row and columns of the plots
     print('figure6','-r300','-dpdf')
 else
+    
     print('figure7','-r300','-dpdf')
 end
 
