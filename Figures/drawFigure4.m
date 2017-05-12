@@ -50,7 +50,7 @@ fontSize = 12;
 lWidth =2;
 gcaOpts = {'tickdir','out','box','off','fontsize',fontSize,'fontname','arial','linewidth',lWidth,'ticklength',[.025,.025]};
 
-cl = {'r', 'b', 'g', 'k'};
+cl = {'g', 'b', 'r', 'k'};
 
 close all;
 
@@ -112,6 +112,7 @@ for c = 1:nComp
     curP = repmat( realP(:,c)',20,1 );
     hImg = image([min(timeCourse),max(timeCourse)],[sigPos(1),sigPos(2)], curP, 'CDataMapping', 'scaled','Parent',gca);
     colormap(gca,tHotColMap );
+    colorbar;
     cMapMax = .05+2*.05/(size(tHotColMap,1));
     set( gca, 'CLim', [ 0 cMapMax ] ); % set range for color scale
     set(gca, gcaOpts{:});
