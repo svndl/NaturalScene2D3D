@@ -2,6 +2,7 @@ function drawFigure5(database)
 %Function to draw figure 5. 
 
 permutationResultFolder = strcat('~/Dropbox/Research/4_IndividualDifferences/NaturalScene2D3D/results/data/',database,'/StimuliChunk/2TrainedSeparatedly/bySubject');
+
 cd(permutationResultFolder);
 
 if ~exist(fullfile(permutationResultFolder,'permutationTestResults.mat'),'file')
